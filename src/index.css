@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import url("https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css");
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+body {
+  font-family: "Vazir", sans-serif;
+}
