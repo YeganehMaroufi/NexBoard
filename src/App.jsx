@@ -20,7 +20,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [selectedUser, setSelectedUser] = useState(null);
 
   /* nav items  */
   const navItems = [
@@ -32,14 +32,14 @@ function App() {
   ];
 
   /* fetch users from api */
-useEffect(() => {
-  setLoading(true);
-  fetch("https://jsonplaceholder.typicode.com/users")
-    .then((res) => res.json())
-    .then((data) => setUsers(data))
-    .catch((err) => console.error(err))
-    .finally(() => setLoading(false));
-}, []);
+  useEffect(() => {
+    setLoading(true);
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div
@@ -55,6 +55,7 @@ useEffect(() => {
       >
         <div className="flex justify-between p-4">
           <div className="text-xl font-bold dark:text-gray-100">Logo</div>
+          {/* close button */}
           <button
             className="lg:hidden dark:text-gray-100"
             onClick={() => {
@@ -66,9 +67,9 @@ useEffect(() => {
         </div>
         {/* navbar starts here   */}
         <div className="p-4 space-y-2">
-          {navItems.map((item) => {
+          {navItems.map((item, idx) => {
             return (
-              <div className="flex p-2 hover:bg-gray-100">
+              <div key={idx} className="flex p-2 hover:bg-gray-100">
                 <div className="text-xl dark:text-gray-100">{item.icon}</div>
                 <div className="pl-2 text-sm font-bold dark:text-gray-100 dark:hover:text-gray-900">
                   {item.name}
@@ -127,38 +128,72 @@ useEffect(() => {
         </header>
 
         {/* all cards here */}
-        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 ">
-          {users
-            .filter((user) => {
-              const query = search.toLowerCase();
-              return (
-                user.name.toLowerCase().includes(query) ||
-                user.username.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
-                user.phone.toLowerCase().includes(query)
-              );
-            })
-            .map((user) => (
-              <div
-                key={user.id}
-                className="p-6 mb-8 bg-white rounded-lg shadow-lg dark:bg-gray-800"
-              >
-                <h2 className="text-xl font-bold dark:text-gray-100">
-                  {user.name}
-                </h2>
-                <p className="p-1 text-gray-700 text-l dark:text-gray-100">
-                  Username: {user.username}
-                </p>
-                <p className="p-1 text-gray-700 text-l dark:text-gray-100">
-                  Email: {user.email}
-                </p>
-                <p className="p-1 text-gray-700 text-l dark:text-gray-100">
-                  Phone: {user.phone}
-                </p>
-              </div>
-            ))}
+        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {loading ? (
+            <div className="col-span-full flex justify-center items-center min-h-[200px]">
+              <div className="w-12 h-12 border-b-2 border-gray-900 rounded-full animate-spin dark:border-white"></div>
+            </div>
+          ) : (
+            users
+              .filter((user) => {
+                const query = search.toLowerCase();
+                return (
+                  user.name.toLowerCase().includes(query) ||
+                  user.username.toLowerCase().includes(query) ||
+                  user.email.toLowerCase().includes(query) ||
+                  user.phone.toLowerCase().includes(query)
+                );
+              })
+              .map((user) => (
+                <div
+                  key={user.id}
+                  className="p-6 mb-8 transition bg-white rounded-lg shadow-lg cursor-pointer dark:bg-gray-800 hover:shadow-xl"
+                  onClick={() => setSelectedUser(user)}
+                >
+                  <h2 className="text-xl font-bold dark:text-gray-100">
+                    {user.name}
+                  </h2>
+                  <p className="p-1 text-gray-700 text-l dark:text-gray-100">
+                    Username: {user.username}
+                  </p>
+                  <p className="p-1 text-gray-700 text-l dark:text-gray-100">
+                    Email: {user.email}
+                  </p>
+                </div>
+              ))
+          )}
         </div>
       </main>
+
+      {/* modal for selected user */}
+      {selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 w-96">
+            <h2 className="mb-4 text-2xl font-bold dark:text-white">
+              {selectedUser.name}
+            </h2>
+            <p className="dark:text-gray-200">
+              Username: {selectedUser.username}
+            </p>
+            <p className="dark:text-gray-200">Email: {selectedUser.email}</p>
+            <p className="dark:text-gray-200">Phone: {selectedUser.phone}</p>
+            <p className="dark:text-gray-200">Website: {selectedUser.website}</p>
+            <p className="dark:text-gray-200">
+              Company: {selectedUser.company?.name}
+            </p>
+            <p className="dark:text-gray-200">
+              Address: {selectedUser.address?.city},{" "}
+              {selectedUser.address?.street}
+            </p>
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-600"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
